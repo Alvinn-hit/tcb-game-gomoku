@@ -1,0 +1,5 @@
+{
+  "usingComponents": {
+    "component-toolbar": "/components/toolbar/toolbar"
+  }
+}

@@ -1,0 +1,9 @@
+<!--components/toolbar.wxml-->
+<view class="component-toolbar">
+  <view class="component-toolbar-item component-toolbar-item_left">
+    <navigator url="/pages/index/index">大厅</navigator>
+  </view>
+  <view class="component-toolbar-item component-toolbar-item_right">
+    <navigator url="/pages/rank/rank">排行榜</navigator>
+  </view>
+</view>
