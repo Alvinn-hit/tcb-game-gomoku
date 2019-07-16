@@ -1,3 +1,5 @@
+const { subscriber } = require('./util.js')
+
 //app.js
 App({
   onLaunch: function () {
@@ -22,7 +24,7 @@ App({
     const that = this
     wx.login({
       success(res) {
-        console.log(res.code)
+        console.log('临时code', res.code)
         wx.cloud
           .callFunction({
             name: 'openid',
@@ -78,6 +80,7 @@ App({
     const hasLogin = await that.getHistoryUserInfo()
     if (hasLogin) {
       console.log('此用户之前登录过')
+      subscriber.trigger('refresh-userinfo')
       return
     }
 
