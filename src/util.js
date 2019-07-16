@@ -48,6 +48,16 @@ const subscriber = {
   }
 };
 
+function genRandomNumber (length) {
+  length = length || 5
+  let str = ''
+  for (let i = 0; i < length; ++i) {
+    str += Math.floor(Math.random() * 10)
+  }
+  return str
+}
+
 module.exports = {
-  subscriber
+  subscriber,
+  genRandomNumber,
 }
