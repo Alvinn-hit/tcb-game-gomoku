@@ -1,2 +1,21 @@
 <!--pages/rank/rank.wxml-->
-<text>pages/rank/rank.wxml</text>
+<view class="page-rank container">
+  <view class="page-rank-header">
+    <text class="page-rank-header_title">{{nickName}}</text>
+  </view>
+  <view class="page-rank-main">
+    <view class="page-rank-main_person">
+      <view>胜利: {{win}}</view>
+      <image class="page-rank-main_person-img" src="{{avatarUrl}}"></image>
+      <view>失败: {{fail}}</view>
+    </view>
+    <view class="page-rank-main_list">
+      <view class="page-rank-main_list-item" wx:for="{{scores}}" wx:key="{{index}}">
+        <text>{{index + 1}}th</text>
+        <text>胜率: {{item.rate}}%</text>
+        <text>胜 {{item.win}} / 负 {{item.fail}}</text>
+      </view>
+    </view>
+  </view>
+  <component-toolbar></component-toolbar>
+</view>

@@ -1,1 +1,65 @@
 /* pages/rank/rank.wxss */
+.page-rank-header {
+  position: fixed;
+  z-index: -1;
+  width: 100vw;
+  height: 20vh;
+  top: 0;
+  left: 0;
+  background: #ff4d4f;
+}
+
+.page-rank-header_title {
+  display: block;
+  text-align: center;
+  padding: 20px 0;
+  color: white;
+  letter-spacing: 2px;
+}
+
+.page-rank-main {
+  position: relative;
+  margin: 0 auto;
+  margin-top: calc(40px + 5vh);
+  width: 92vw;
+  min-height: 100vh;
+  border-radius: 5px;
+  background: white;
+}
+
+.page-rank-main_person {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-around;
+  font-weight: bold;
+}
+
+.page-rank-main_person-img {
+  height: 80px;
+  width: 80px;
+  border: 2px solid #f5f5f5;
+  border-radius: 50%;
+}
+
+.page-rank-main_list {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.page-rank-main_list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  font-weight: bold;
+  line-height: 2;
+  background: #fafafa;
+  padding: 12px 0 12px;
+}
+
+.page-rank-main_list-item text {
+  width: 33%;
+  text-align: center;
+}
