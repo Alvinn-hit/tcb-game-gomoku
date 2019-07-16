@@ -44,6 +44,8 @@ Page({
       win: user.win || 0,
       fail: user.fail || 0
     })
+    this.getUserScore()
+    this.getRankScores()
     subscriber.listen('refresh-userinfo', this.refreshUserInfo)
   },
 

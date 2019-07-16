@@ -6,7 +6,7 @@
   width: 100vw;
   left: 0;
   bottom: 0;
-  background: #f5f5f5;
+  background: #fafafa;
   display: flex;
   flex-direction: row;
   justify-content: center;

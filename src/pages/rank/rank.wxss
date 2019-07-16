@@ -25,6 +25,7 @@
   min-height: 100vh;
   border-radius: 5px;
   background: white;
+  box-shadow: 0 8px 20px rgba(143,168,191,0.35);
 }
 
 .page-rank-main_person {
