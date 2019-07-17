@@ -57,7 +57,17 @@ function genRandomNumber (length) {
   return str
 }
 
+function querystring (params) {
+  let result = ''
+  Reflect.ownKeys(params)
+    .forEach(key => {
+      result += `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}&`
+    })
+  return result.slice(0, result.length - 1)
+}
+
 module.exports = {
   subscriber,
   genRandomNumber,
+  querystring
 }
