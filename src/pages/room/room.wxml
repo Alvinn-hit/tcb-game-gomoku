@@ -1,18 +1,16 @@
 <!--pages/room/room.wxml-->
 <view class="page-rank container">
   <view class="page-rank-header">
-    <view class="page-rank-header_btn">对战中</view>
+    <view class="page-rank-header_btn">房间号 {{roomid}}</view>
   </view>
   <view class="page-rank-main">
-    <view>
-      <canvas 
-        id="checkerboard"
-        canvas-id="checkerboard" 
-        style="width: 300px; height: 300px;"
-        bindtap="putDown"
-      >
-      </canvas>
-    </view>
+    <canvas 
+      id="checkerboard"
+      canvas-id="checkerboard" 
+      style="width: 300px; height: 300px;"
+      bindtap="putDown"
+    >
+    </canvas>
   </view>
-  <component-toolbar></component-toolbar>
+  <!-- <component-toolbar></component-toolbar> -->
 </view>
