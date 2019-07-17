@@ -1,9 +1,17 @@
 <!--components/toolbar.wxml-->
 <view class="component-toolbar">
-  <view class="component-toolbar-item component-toolbar-item_left">
-    <navigator url="/pages/index/index">大厅</navigator>
+  <view 
+    class="component-toolbar-item component-toolbar-item_left" 
+    bindtap="toggleRoute" 
+    data-url="/pages/index/index"
+  >
+    <text>游戏大厅</text>
   </view>
-  <view class="component-toolbar-item component-toolbar-item_right">
-    <navigator url="/pages/rank/rank">排行榜</navigator>
+  <view 
+    class="component-toolbar-item component-toolbar-item_right" 
+    bindtap="toggleRoute" 
+    data-url="/pages/rank/rank"
+  >
+    <text>排行榜</text>
   </view>
 </view>

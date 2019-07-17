@@ -4,20 +4,33 @@ Component({
    * 组件的属性列表
    */
   properties: {
-
+    routePath: {
+      type: String,
+      value: 'index'
+    }
   },
 
-  /**
-   * 组件的初始数据
-   */
   data: {
-    
+    routePath: ''
   },
 
-  /**
-   * 组件的方法列表
-   */
-  methods: {
+  lifetimes: {
+    attached: function () {
+      const { routePath } = this.data
+      this.setData({
+        routePath: routePath.startsWith('/') ? routePath : `/${routePath}`
+      }) 
+    }
+  },
 
+  methods: {
+    toggleRoute: function (ev) {
+      const { dataset } = ev.currentTarget
+      if (this.properties.routePath !== dataset.url) {
+        wx.navigateTo({
+          url: dataset.url,
+        })
+      }
+    }
   }
 })

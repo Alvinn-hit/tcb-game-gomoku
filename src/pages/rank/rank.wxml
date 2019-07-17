@@ -17,5 +17,5 @@
       </view>
     </view>
   </view>
-  <component-toolbar></component-toolbar>
+  <component-toolbar route-path="pages/rank/rank"></component-toolbar>
 </view>

@@ -19,5 +19,5 @@
       <text>{{item.people >= 2 ? '对战中' : '可进入'}}</text>
     </view>
   </view>
-  <component-toolbar></component-toolbar>
+  <component-toolbar route-path="pages/index/index"></component-toolbar>
 </view>
