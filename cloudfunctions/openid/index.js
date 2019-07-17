@@ -39,11 +39,8 @@ exports.main = async (event, context) => {
     }
   }
 
-  console.log(`code is ${code}`)
-
   try {
     const res = await getOpenID(code)
-    console.log('res is', res)
     if (res.openid) {
       return {
         code: 0,
@@ -62,7 +59,6 @@ exports.main = async (event, context) => {
       }
     }
   } catch (error) {
-    console.log('error is', error)
     return {
       code: 1,
       msg: error.message
