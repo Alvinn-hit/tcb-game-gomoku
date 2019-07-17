@@ -6,7 +6,6 @@ const db = wx.cloud.database({
 })
 const $ = db.command.aggregate
 
-// pages/rank/rank.js
 Page({
 
   /**
@@ -17,76 +16,50 @@ Page({
     avatarUrl: '', // 用户头像
     win: 0, // 胜利场次
     fail: 0, // 失败场次
-    scores: []
-  },
-
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad: function (options) {
-  },
-
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady: function () {
-
+    scores: [] // 胜率排行前50的用户
   },
 
   /**
    * 生命周期函数--监听页面显示
    */
   onShow: function () {
-    const { user } = app.globalData
-    this.setData({
-      nickName: user.nickName || 'LOADING...',
-      avatarUrl: user.avatarUrl || '',
-      win: user.win || 0,
-      fail: user.fail || 0
-    })
     this.getUserScore()
     this.getRankScores()
-    subscriber.listen('refresh-userinfo', this.refreshUserInfo)
+    // 单独开发此页面需要打开，开发环境网络并不稳定
+    // TODO：结合生命周期实现更兼容的方法
+    // subscriber.listen('refresh-userinfo', this.refreshUserInfo)
   },
 
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide: function () {
-    subscriber.remove('refresh-userinfo', this.refreshUserInfo)
-  },
-
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload: function () {
-    subscriber.remove('refresh-userinfo', this.refreshUserInfo)
-  },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom: function () {
-    console.log('触底下拉')
-  },
-
-  /**
-   * 监听 + 响应：全局拉取用户信息
-   */
-  refreshUserInfo: function () {
-    this.setData({
-      nickName: app.globalData.user.nickName,
-      avatarUrl: app.globalData.user.avatarUrl
-    })
-    this.getUserScore()
-    this.getRankScores()
-  },
+  // 单独开发此页面需要打开，开发环境网络并不稳定
+  // TODO：结合生命周期实现更兼容的方法
+  // onHide: function () {
+  //   subscriber.remove('refresh-userinfo', this.refreshUserInfo)
+  // },
+  // onUnload: function () {
+  //   subscriber.remove('refresh-userinfo', this.refreshUserInfo)
+  // },
+  // /**
+  //  * 监听 + 响应：全局拉取用户信息
+  //  */
+  // refreshUserInfo: function () {
+  //   this.setData({
+  //     nickName: app.globalData.user.nickName,
+  //     avatarUrl: app.globalData.user.avatarUrl
+  //   })
+  //   this.getUserScore()
+  //   this.getRankScores()
+  // },
 
   /**
    * 获取用户的胜负信息
    */
   getUserScore: function () {
     const that = this
+
+    this.setData({
+      nickName: app.globalData.user.nickName,
+      avatarUrl: app.globalData.user.avatarUrl
+    })
 
     db.collection('scores')
       .where({
@@ -105,6 +78,9 @@ Page({
       .catch(console.error)
   },
 
+  /**
+   * 获取排名前50的用户的信息
+   */
   getRankScores: async function () {
     const { list: scores } = await db.collection('scores')
       .aggregate()
@@ -124,7 +100,7 @@ Page({
       .sort({
         rate: -1
       })
-      .limit(10)
+      .limit(50)
       .end()
     
     this.setData({
