@@ -1,6 +1,7 @@
 const app = getApp()
 const {
-  genRandomNumber
+  genRandomNumber,
+  querystring,
 } = require('./../../util.js')
 
 const db = wx.cloud.database({
@@ -8,64 +9,24 @@ const db = wx.cloud.database({
 })
 const $ = db.command.aggregate
 
-// pages/index/index.js
 Page({
-
-  /**
-   * 页面的初始数据
-   */
   data: {
+    // 保存所有房间信息
     rooms: []
   },
 
   /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad: function (options) {
-  },
-
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady: function () {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面显示
+   * 每次回到此页面，均需要重新刷新房间信息
+   * TODO：自动轮询刷新
    */
   onShow: function () {
     this.getRooms()
   },
 
   /**
-   * 生命周期函数--监听页面隐藏
+   * 检测房间号是否存在
+   * 用途：创建房间时，避免创建重复房间
    */
-  onHide: function () {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload: function () {
-
-  },
-
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh: function () {
-
-  },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom: function () {
-
-  },
-
   checkExistRoom: async function (roomid) {
     try {
       const { data } = await db.collection('rooms').where({roomid}).get()
@@ -76,6 +37,9 @@ Page({
     }
   },
 
+  /**
+   * 创建房间，创建成功后进入
+   */
   createRoom: function () {
     const that = this
     const roomid = genRandomNumber(5)
@@ -108,19 +72,33 @@ Page({
           await db.collection('rooms')
             .add({
               data: {
+                // 房间号
                 roomid,
-                builder: app.globalData.user.openid,
+                // 房间主人
+                owner: {
+                  id: app.globalData.user.openid,
+                  color: 'black'
+                },
+                // 房间玩家
+                player: {
+                  id: '',
+                  color: ''
+                },
+                // 当前是谁下棋
+                nowcolor: 'black',
+                // string化后的五子棋盘
+                chessmen: '', 
+                // 创建时间
                 timestamp: Date.now().toString(),
-                people: [
-                  app.globalData.user.openid
-                ]
+                // 人数
+                people: 1
               }
             })
           wx.showToast({
             title: `创建成功`,
             icon: 'loading'
           })
-
+          that.intoRoom(roomid, app.globalData.user.openid)
         } catch (error) {
           console.error(error)
         }
@@ -128,26 +106,40 @@ Page({
     })
   },
 
+  /**
+   * 抓取所有房间信息
+   */
   getRooms: async function () {
-    const res = await db.collection('rooms')
+    const { list: rooms } = await db.collection('rooms')
       .aggregate()
       .sort({
         timestamp: -1
       })
       .end()
-    this.setData({
-      rooms: res.list.map(item => ({
-        ...item,
-        full: item.people.length >= 2
-      }))
-    })
+    this.setData({ rooms })
   },
 
-  intoRoom: function (ev) {
+  /**
+   * 选择房间列表中的房间
+   * 用途：玩家在大厅选择进入房间
+   * TODO：观战模式
+   */
+  chooseRoom: function (ev) {
     const index = ev.currentTarget.dataset['index']
-    if (this.data.rooms[index].full) {
+    if (this.data.rooms[index].people >= 2) {
       return
     }
-    console.log(`index is ${index}`)
+    const room = this.data.rooms[index]
+    this.intoRoom(room.roomid, app.globalData.user.openid)
+  },
+
+  /**
+   * 进入“可进入”房间
+   */
+  intoRoom: function (roomid, playerid) {    
+    const routerParams = { roomid, playerid }
+    wx.navigateTo({
+      url: '/pages/room/room?' + querystring(routerParams)
+    })
   }
 })

@@ -9,14 +9,14 @@
       <text>状态</text>
     </view>
     <view 
-      class="{{item.full ? 'page-rank-main_item fighting' : 'page-rank-main_item waiting'}}" 
+      class="{{item.people >= 2 ? 'page-rank-main_item fighting' : 'page-rank-main_item waiting'}}" 
       wx:for="{{rooms}}" 
       wx:key="{{index}}"
-      catchtap="intoRoom"
+      catchtap="chooseRoom"
       data-index="{{index}}"
     >
       <text>{{item.roomid}}</text>
-      <text>{{item.full ? '对战中' : '可进入'}}</text>
+      <text>{{item.people >= 2 ? '对战中' : '可进入'}}</text>
     </view>
   </view>
   <component-toolbar></component-toolbar>
