@@ -1,0 +1,36 @@
+/* pages/room/room.wxss */
+.page-rank-header {
+  position: fixed;
+  z-index: -1;
+  width: 100vw;
+  height: 20vh;
+  top: 0;
+  left: 0;
+  background: #ff4d4f;
+}
+
+.page-rank-header_btn {
+  color: white;
+  text-align: center;
+  border-radius: 5px;
+  padding: 20px 0;
+}
+
+.page-rank-main {
+  position: relative;
+  margin: 0 auto;
+  margin-top: calc(40px + 5vh);
+  width: 92vw;
+  height: calc(100vh - (40px + 5vh + 10vh));
+  border-radius: 5px;
+  background: white;
+  box-shadow: 0 8px 20px rgba(143,168,191,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* canvas {
+  position: relative;
+  left: -37.5px;
+} */

@@ -1,0 +1,18 @@
+<!--pages/room/room.wxml-->
+<view class="page-rank container">
+  <view class="page-rank-header">
+    <view class="page-rank-header_btn">对战中</view>
+  </view>
+  <view class="page-rank-main">
+    <view>
+      <canvas 
+        id="checkerboard"
+        canvas-id="checkerboard" 
+        style="width: 300px; height: 300px;"
+        bindtap="putDown"
+      >
+      </canvas>
+    </view>
+  </view>
+  <component-toolbar></component-toolbar>
+</view>
