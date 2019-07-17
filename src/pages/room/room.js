@@ -1,4 +1,7 @@
-// pages/room/room.js
+const db = wx.cloud.database({
+  env: 'firsttest-qee47'
+})
+const $ = db.command.aggregate
 
 class Drawer {
   constructor (ctx) {
@@ -50,6 +53,38 @@ class Drawer {
 
 }
 
+function encodeArray (arr) {
+  return arr.flat().join(',')
+}
+
+function decodeArray (str, shape) {
+  const arr = str.split(',')
+    .map(item => parseInt(item, 10))
+
+  const [ row, col ] = shape
+  const result = new Array(row)
+  for (let i = 0; i < row; ++i) {
+    result[i] = new Array(col)
+    for (let j = 0; j < col; ++j) {
+      result[i][j] = arr.shift()
+    }
+  }
+
+  return result
+}
+
+function diffArray (arr1, arr2, shape) {
+  const [row, col] = shape
+  for (let i = 0; i < row; ++i) {
+    for (let j = 0; j < col; ++j) {
+      if (arr1[i][j] !== arr2[i][j]) {
+        return [i, j]
+      }
+    }
+  }
+  return [-1, -1]
+}
+
 Page({
 
   /**
@@ -57,74 +92,154 @@ Page({
    */
   data: {
     drawer: null,
-    color: 'black',
-    lines: -1,
-    chessmen: []
+    // 棋子颜色：black / white
+    color: '',
+    // 行数 / 列数
+    lines: 15,
+    // 棋盘：黑子(-1)；白子(1)
+    chessmen: [],
+    // 房间号
+    roomid: '',
+    // 当前玩家id
+    playerid: '',
+    // room记录的id
+    docid: ''
   },
 
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad: function (options) {
-
+  onLoad: function (option) {
+    const { roomid, playerid } = option
+    this.setData({ roomid, playerid })
   },
 
   /**
    * 生命周期函数--监听页面显示
    */
-  onShow: function () {
-    const lines = 15
+  onShow: async function () {
+    // 识别玩家身份
+    const identity = await this.judgeIdentity()
+    if (!identity) {
+      console.log('玩家身份无法标识')
+      return 
+    }
+    // 初始化棋盘数据
+    const { lines } = this.data
     const chessmen = new Array(lines)
     for (let i = 0; i < lines; ++i) {
       chessmen[i] = new Array(lines)
       for (let j = 0; j < lines; ++j) {
-        chessmen[i][j] = 0 
+        chessmen[i][j] = 0
       }
     }
-
+    // 初始化画布
     const ctx = wx.createCanvasContext('checkerboard')
     const drawer = new Drawer(ctx)
-
+    drawer.lines(lines)
+    // 更新数据
+    const that = this
     this.setData({
       drawer,
-      lines,
       chessmen
+    }, async function () {
+      await that[`${identity}JoinGame`]()
     })
-    drawer.lines(lines)
   },
 
   /**
-   * 生命周期函数--监听页面隐藏
+   * 判断用户身份，返回 'owner' / 'player'
    */
-  onHide: function () {
+  judgeIdentity: async function () {
+    const { roomid, playerid } = this.data
 
+    try {
+      const { data } = await db.collection('rooms')
+        .where({ roomid })
+        .get()
+      this.setData({docid: data[0]._id})
+      if (data[0].owner.id === playerid) {
+        return 'owner'
+      } else {
+        return 'player'
+      }       
+    } catch (error) {
+      console.error(error)
+      return ''
+    }
   },
 
   /**
-   * 生命周期函数--监听页面卸载
+   * 房间主人创建后，进入房间
+   * 用途：更新远程棋盘
    */
-  onUnload: function () {
-
-  },
+  ownerJoinGame: async function () {
+    this.setData({
+      color: 'black'
+    })
+    try {
+      const { docid, chessmen } = this.data
+      await db.collection('rooms')
+        .doc(docid)
+        .update({
+          data: {
+            chessmen: encodeArray(chessmen)
+          }
+        })
+    } catch (error) {
+      console.error(error)
+    }
+  },  
 
   /**
-   * 页面相关事件处理函数--监听用户下拉动作
+   * 玩家进入房间后
+   * 用途：拉取棋盘，更新房间数据状态
    */
-  onPullDownRefresh: function () {
-
+  playerJoinGame: async function () {
+    try {
+      const { docid, playerid, roomid, lines } = this.data
+      await db.collection('rooms')
+        .doc(docid)
+        .update({
+          data: {
+            player: {
+              color: 'white',
+              id: playerid
+            },
+            people: 2
+          }
+        })
+      const { data } = await db.collection('rooms')
+        .where({ roomid })
+        .get()
+      const chessmen = decodeArray(data[0].chessmen, [lines, lines])
+      this.setData({
+        color: 'white',
+        chessmen
+      })
+      console.log(this.data)
+    } catch (error) {
+      console.error(error)
+    }
   },
 
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom: function () {
+  joinGame: async function () {
+    const { playerid, roomid } = this.data
+    try {
+      const { data } = await db.collection('rooms')
+        .where({ roomid })
+        .get()
+      const { people, _id } = data[0]
+      if (people.indexOf(playerid) !== -1) {
+        return
+      }
 
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage: function () {
+      people.push(playerid)
+      const res2 = await db.collection('rooms')
+        .doc(_id)
+        .update({data: {people}})
+      console.log('res2 is', res2)
+    } catch (error) {
+      console.error(error)
+      return
+    }
 
   },
 

@@ -1,7 +1,7 @@
 {
   "pages": [
-    "pages/room/room",
     "pages/index/index",
+    "pages/room/room",
     "pages/rank/rank"
   ],
   "window": {
