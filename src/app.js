@@ -79,7 +79,10 @@ App({
     const that = this
     const hasLogin = await that.getHistoryUserInfo()
     if (hasLogin) {
-      console.log('此用户之前登录过')
+      wx.showToast({
+        title: '用户登录过',
+        duration: 2000
+      })
       subscriber.trigger('refresh-userinfo')
       return
     }
@@ -113,6 +116,13 @@ App({
           })
           .then(res => console.log('初始化 users', res))
           .catch(console.error) 
+      },
+      fail() {
+        wx.showToast({
+          title: '获取用户信息失败',
+          icon: 'none',
+          duration: 2000
+        })
       }
     })
   }
