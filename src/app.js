@@ -1,4 +1,4 @@
-const { subscriber } = require('./util.js')
+const { subscriber } = require('./shared/util.js')
 
 //app.js
 App({

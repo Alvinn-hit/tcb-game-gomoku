@@ -1,5 +1,4 @@
 const app = getApp()
-const { subscriber } = require('./../../util.js')
 
 const db = wx.cloud.database({
   env: 'firsttest-qee47'

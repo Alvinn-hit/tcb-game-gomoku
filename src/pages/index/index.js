@@ -2,7 +2,7 @@ const app = getApp()
 const {
   genRandomNumber,
   querystring,
-} = require('./../../util.js')
+} = require('./../../shared/util.js')
 
 const db = wx.cloud.database({
   env: 'firsttest-qee47'

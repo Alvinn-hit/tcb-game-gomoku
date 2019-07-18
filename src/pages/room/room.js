@@ -1,89 +1,13 @@
+const Drawer = require('./../../shared/drawer.js')
+const {
+  encodeArray,
+  decodeArray,
+  diffArray 
+} = require('./../../shared/util.js')
+
 const db = wx.cloud.database({
   env: 'firsttest-qee47'
 })
-const $ = db.command.aggregate
-
-class Drawer {
-  constructor (ctx) {
-    this.ctx = ctx
-  }
-
-  lines(num) {
-    this.ctx.setStrokeStyle('#595959')
-    for (let i = 0; i < num; ++i) {
-      this.ctx.moveTo(10, 10 + i * 20)
-      this.ctx.lineTo(290, 10 + i * 20)
-      this.ctx.stroke()
-
-      this.ctx.moveTo(10 + i * 20, 10)
-      this.ctx.lineTo(10 + i * 20, 290)
-      this.ctx.stroke()
-    }
-    this.ctx.draw(true)
-  }
-
-  circle(row, col, color) {
-    color = color.toLocaleLowerCase()
-    const y = 10 + row * 20
-    const x = 10 + col * 20
-    const r = 8
-
-    this.ctx.beginPath()
-    this.ctx.arc(x, y, r, 0, 2 * Math.PI)
-    this.ctx.closePath()
-
-    const grd = this.ctx.createCircularGradient(x, y, r)
-    switch (color) {
-      case 'black':
-        grd.addColorStop(0, '#262626')
-        grd.addColorStop(1, '#595959')
-        break
-      case 'white':
-        grd.addColorStop(0, '#ffffff')
-        grd.addColorStop(1, '#d9d9d9')
-        break
-      default:
-        console.error(new Error('参数错误'))
-    }
-
-    this.ctx.setFillStyle(grd)
-    this.ctx.fill()
-    this.ctx.draw(true)
-  }
-
-}
-
-function encodeArray (arr) {
-  return arr.flat().join(',')
-}
-
-function decodeArray (str, shape) {
-  const arr = str.split(',')
-    .map(item => parseInt(item, 10))
-
-  const [ row, col ] = shape
-  const result = new Array(row)
-  for (let i = 0; i < row; ++i) {
-    result[i] = new Array(col)
-    for (let j = 0; j < col; ++j) {
-      result[i][j] = arr.shift()
-    }
-  }
-
-  return result
-}
-
-function diffArray (arr1, arr2, shape) {
-  const [row, col] = shape
-  for (let i = 0; i < row; ++i) {
-    for (let j = 0; j < col; ++j) {
-      if (arr1[i][j] !== arr2[i][j]) {
-        return [i, j]
-      }
-    }
-  }
-  return [-1, -1]
-}
 
 Page({
 

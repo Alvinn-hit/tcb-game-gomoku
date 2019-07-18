@@ -66,8 +66,43 @@ function querystring (params) {
   return result.slice(0, result.length - 1)
 }
 
+function encodeArray (arr) {
+  return arr.flat().join(',')
+}
+
+function decodeArray (str, shape) {
+  const arr = str.split(',')
+    .map(item => parseInt(item, 10))
+
+  const [ row, col ] = shape
+  const result = new Array(row)
+  for (let i = 0; i < row; ++i) {
+    result[i] = new Array(col)
+    for (let j = 0; j < col; ++j) {
+      result[i][j] = arr.shift()
+    }
+  }
+
+  return result
+}
+
+function diffArray (arr1, arr2, shape) {
+  const [row, col] = shape
+  for (let i = 0; i < row; ++i) {
+    for (let j = 0; j < col; ++j) {
+      if (arr1[i][j] !== arr2[i][j]) {
+        return [i, j]
+      }
+    }
+  }
+  return [-1, -1]
+}
+
 module.exports = {
   subscriber,
   genRandomNumber,
-  querystring
+  querystring,
+  encodeArray,
+  decodeArray,
+  diffArray,
 }
