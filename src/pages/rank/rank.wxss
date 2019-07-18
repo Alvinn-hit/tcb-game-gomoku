@@ -22,7 +22,7 @@
   margin: 0 auto;
   margin-top: calc(40px + 5vh);
   width: 92vw;
-  min-height: 100vh;
+  min-height: calc(100vh - (40px + 5vh + 10vh));
   border-radius: 5px;
   background: white;
   box-shadow: 0 8px 20px rgba(143,168,191,0.35);
