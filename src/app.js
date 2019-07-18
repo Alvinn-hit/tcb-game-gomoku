@@ -36,6 +36,7 @@ App({
             if (result.code === 0) {
               that.globalData.user.openid = result.openid
               that.getUserInfo()
+              console.log('openid获取成功', result.openid)
             } else {
               wx.showToast({
                 title: '获取openid失败',
@@ -84,47 +85,21 @@ App({
         duration: 2000
       })
       subscriber.trigger('refresh-userinfo')
-      return
+    } else {
+      wx.navigateTo({
+        url: '/pages/auth/auth',
+      })
     }
 
-    wx.getUserInfo({
-      success (res) {
-        const { nickName, avatarUrl } = res.userInfo
-        that.globalData.user.nickName = nickName
-        that.globalData.user.avatarUrl = avatarUrl
-
-        const db = wx.cloud.database({
-          env: 'firsttest-qee47'
-        })
-        db.collection('scores')
-          .add({
-            data: {
-              openid: that.globalData.user.openid,
-              win: 0,
-              fail: 0
-            }
-          })
-          .then(res => console.log('初始化 scores', res))
-          .catch(error => console.error)
-        db.collection('users')
-          .add({
-            data: {
-              openid: that.globalData.user.openid,
-              nickName,
-              avatarUrl
-            }
-          })
-          .then(res => console.log('初始化 users', res))
-          .catch(console.error) 
-      },
-      fail() {
-        wx.showToast({
-          title: '获取用户信息失败',
-          icon: 'none',
-          duration: 2000
-        })
-      }
-    })
+    // wx.getSetting({
+    //   success(res) {
+    //     if (res.authSetting['scope.userInfo']) {
+    //       wx.authorize({
+    //         scope: 'scope.userInfo',
+    //         success: wxGetUserInfo
+    //       })
+    //     }
+    //   }
+    // })
   }
-
 })

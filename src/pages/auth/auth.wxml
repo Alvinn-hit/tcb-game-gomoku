@@ -1,0 +1,4 @@
+<!--src/pages/auth/auth.wxml-->
+<button open-type="getUserInfo" bindgetuserinfo="getUserInfo">
+  点击授权，获取头像+名称
+</button>
