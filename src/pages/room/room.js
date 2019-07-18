@@ -103,7 +103,9 @@ Page({
     // 当前玩家id
     playerid: '',
     // room记录的id
-    docid: ''
+    docid: '',
+    // 能不能走棋子
+    canRun: false
   },
 
   onLoad: function (option) {
@@ -144,6 +146,11 @@ Page({
     })
   },
 
+  onUnload: function () {
+    const { interval } = this.data
+    interval && clearInterval(interval)
+  },
+
   /**
    * 判断用户身份，返回 'owner' / 'player'
    */
@@ -180,13 +187,86 @@ Page({
         .doc(docid)
         .update({
           data: {
-            chessmen: encodeArray(chessmen)
+            chessmen: encodeArray(chessmen),
+            nowcolor: 'black'
           }
         })
+      this.ownerWaitPlayer()
     } catch (error) {
       console.error(error)
     }
-  },  
+  },
+
+  /**
+   * 房间主人等待玩家进入
+   * 用途：通过监听 people 来实现
+   */
+  ownerWaitPlayer: function () {
+    const { roomid } = this.data
+    const that = this
+    const interval = setInterval(function () {
+      db.collection('rooms')
+        .where({ roomid })
+        .get()
+        .then(res => {
+          const { data } = res
+          if (data[0].people === 2) {
+            that.setData({
+              canRun: true
+            })
+            that.listenRemoteRefresh()
+            clearInterval(interval)
+          }
+        })
+        .catch(error => {
+          console.error(error)
+          clearInterval(interval)
+        })
+    }, 5000)
+  },
+
+  /**
+   * 房间主人监听远程棋盘刷新
+   */
+  listenRemoteRefresh: function () {
+    const that = this
+    const { roomid, lines, drawer } = this.data
+    const interval = setInterval(function () {
+      const { chessmen } = that.data
+      db.collection('rooms')
+        .where({ roomid })
+        .get()
+        .then(res => {
+          const { data } = res
+          // 和本机的棋盘状态进行比较
+          if (encodeArray(chessmen) === data[0].chessmen) {
+            return 
+          }
+          // 远程棋盘发生更新, 本地绘制棋子
+          const decoded = decodeArray(data[0].chessmen, [lines, lines])
+          const [x, y] = diffArray(decoded, chessmen, [lines, lines])
+          console.log('远程更新的坐标(x, y):', x, y, '; 玩家颜色: ', decoded[x][y] === 1 ? 'black' : 'white')
+          drawer.circle(x, y, decoded[x][y] === 1 ? 'black' : 'white')
+          // 判断新棋盘是否有胜利
+          const win = that.judge(x, y, decoded)
+          if (win) {
+            console.log('胜利的棋子是：', decoded[x][y])
+            wx.showToast({
+              title: decoded[x][y] === 1 ? '黑子胜利' : '白子胜利',
+            })
+          }
+          // 更新数据
+          that.setData({
+            canRun: true,
+            chessmen: decoded
+          })
+        })
+    }, 5000)
+    
+    this.setData({
+      interval
+    })
+  },
 
   /**
    * 玩家进入房间后
@@ -212,38 +292,26 @@ Page({
       const chessmen = decodeArray(data[0].chessmen, [lines, lines])
       this.setData({
         color: 'white',
-        chessmen
-      })
-      console.log(this.data)
+        chessmen,
+        canRun: false
+      }, this.listenRemoteRefresh)
+      // console.log(this.data)
     } catch (error) {
       console.error(error)
     }
   },
 
-  joinGame: async function () {
-    const { playerid, roomid } = this.data
-    try {
-      const { data } = await db.collection('rooms')
-        .where({ roomid })
-        .get()
-      const { people, _id } = data[0]
-      if (people.indexOf(playerid) !== -1) {
-        return
-      }
-
-      people.push(playerid)
-      const res2 = await db.collection('rooms')
-        .doc(_id)
-        .update({data: {people}})
-      console.log('res2 is', res2)
-    } catch (error) {
-      console.error(error)
+  /**
+   * 房间主人 / 玩家落子
+   */
+  putDown: function (ev) {
+    if (!this.data.canRun) {
+      wx.showToast({
+        title: '请等待其他玩家',
+        icon: 'none'
+      })
       return
     }
-
-  },
-
-  putDown: function (ev) {
     const that = this
     const { x, y } = ev.detail
     const query = wx.createSelectorQuery()
@@ -269,20 +337,80 @@ Page({
           return 
         } else {
           // 黑子：1；白子：-1
-          chessmen[row][col] = color === 'white' ? 1 : -1
+          chessmen[row][col] = color === 'black' ? 1 : -1
         }
 
         drawer.circle(row, col, color)
-        that.setData({
-          color: color === 'white' ? 'black' : 'white'
-        })
-        that.judge(row, col)
+        that.setData({ canRun: false })
+        if (color === 'black') {
+          that.ownerUpdateRemoteChessmen(row, col)
+        } else {
+          that.playerUpdateRemoteChessmen(row, col)
+        }
       })
       .exec()
   },
 
-  judge: function (x, y) {
-    const { chessmen, lines } = this.data
+  /**
+   * 落子后，玩家更新远程棋盘
+   */
+  playerUpdateRemoteChessmen: async function (row, col) {
+    const { chessmen, docid } = this.data
+    try {
+      await db.collection('rooms')
+        .doc(docid)
+        .update({
+          data: {
+            chessmen: encodeArray(chessmen),
+            nowcolor: 'black'
+          }
+        })
+      const win = this.judge(row, col)
+      if (!win) {
+        return
+      }
+      wx.showToast({
+        title: chessmen[row][col] === 1 ? '黑子胜利' : '白子胜利',
+      })
+    } catch (error) {
+      console.error(error)
+    }
+  },
+
+  /**
+   * 落子后，房间主人更新远程棋盘
+   */
+  ownerUpdateRemoteChessmen: async function (row, col) {
+    const { chessmen, docid } = this.data
+    try {
+      await db.collection('rooms')
+        .doc(docid)
+        .update({
+          data: {
+            chessmen: encodeArray(chessmen),
+            nowcolor: 'white'
+          }
+        })
+      const win = this.judge(row, col)
+      if (!win) {
+        return
+      }
+      wx.showToast({
+        title: chessmen[row][col] === 1 ? '黑子胜利' : '白子胜利',
+      })
+    } catch (error) {
+      console.error(error)
+    }
+  },
+
+  /**
+   * 判断输赢
+   */
+  judge: function (x, y, chessmen) {
+    if (!Array.isArray(chessmen)) {
+      chessmen = this.data.chessmen
+    }
+    const { lines } = this.data
     let num = 0, target = chessmen[x][y]
     
     // 垂直方向
