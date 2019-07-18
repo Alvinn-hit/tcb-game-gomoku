@@ -3,7 +3,6 @@ const { subscriber } = require('./util.js')
 //app.js
 App({
   onLaunch: function () {
-    
     if (!wx.cloud) {
       console.error('请使用 2.2.3 或以上的基础库以使用云能力')
     } else {
@@ -69,7 +68,8 @@ App({
         return true
       }
     } catch (error) {
-      console.error(error)
+      console.log('【app.js】', '查找用户信息错误')
+      return true
     }
 
     return false
@@ -93,6 +93,16 @@ App({
         const db = wx.cloud.database({
           env: 'firsttest-qee47'
         })
+        db.collection('scores')
+          .add({
+            data: {
+              openid: that.globalData.user.openid,
+              win: 0,
+              fail: 0
+            }
+          })
+          .then(res => console.log('初始化 scores', res))
+          .catch(error => console.error)
         db.collection('users')
           .add({
             data: {
@@ -101,9 +111,7 @@ App({
               avatarUrl
             }
           })
-          .then(res => {
-            console.log(res)
-          })
+          .then(res => console.log('初始化 users', res))
           .catch(console.error) 
       }
     })
