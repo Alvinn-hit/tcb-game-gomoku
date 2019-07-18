@@ -254,6 +254,7 @@ Page({
             wx.showToast({
               title: decoded[x][y] === 1 ? '黑子胜利' : '白子胜利',
             })
+            that.logScore(x, y, decoded)
           }
           // 更新数据
           that.setData({
@@ -262,7 +263,7 @@ Page({
           })
         })
     }, 5000)
-    
+
     this.setData({
       interval
     })
@@ -372,6 +373,7 @@ Page({
       wx.showToast({
         title: chessmen[row][col] === 1 ? '黑子胜利' : '白子胜利',
       })
+      this.logScore(row, col)
     } catch (error) {
       console.error(error)
     }
@@ -398,6 +400,7 @@ Page({
       wx.showToast({
         title: chessmen[row][col] === 1 ? '黑子胜利' : '白子胜利',
       })
+      this.logScore(row, col)
     } catch (error) {
       console.error(error)
     }
@@ -482,5 +485,55 @@ Page({
     }
 
     return false
+  },
+  
+  /**
+   * 记录玩家成绩，并且返回首页
+   */
+  logScore: async function (x, y, chessmen) {
+    if (!Array.isArray(chessmen)) {
+      chessmen = this.data.chessmen
+    }
+    const { color, playerid } = this.data
+
+    const { data } = await db.collection('scores')
+      .where({
+        openid: playerid
+      })
+      .get()
+    if (!data.length) {
+      wx.showToast({
+        title: '用户成绩丢失',
+        icon: 'none'
+      })
+    }
+
+    const target = data[0]
+    // 胜利
+    if (
+      (color === 'black' && chessmen[x][y] === 1) ||
+      (color === 'white' && chessmen[x][y] === -1)
+    ) {
+      await db.collection('scores')
+        .doc(target._id)
+        .update({
+          data: {
+            win: target.win + 1
+          }
+        })
+    // 失败
+    } else {
+      await db.collection('scores')
+        .doc(target._id)
+        .update({
+          data: {
+            fail: target.fail + 1
+          }
+        })
+    }
+
+    wx.navigateBack({
+      delta: 100
+    })
   }
 })
