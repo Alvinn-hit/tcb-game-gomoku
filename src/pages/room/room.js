@@ -183,14 +183,17 @@ Page({
     })
     try {
       const { docid, chessmen } = this.data
-      await db.collection('rooms')
-        .doc(docid)
-        .update({
+      await wx.cloud.callFunction({
+        name: 'update_doc',
+        data: {
+          collection: 'rooms',
+          docid,
           data: {
             chessmen: encodeArray(chessmen),
             nowcolor: 'black'
           }
-        })
+        }
+      })
       this.ownerWaitPlayer()
     } catch (error) {
       console.error(error)
@@ -262,7 +265,7 @@ Page({
             chessmen: decoded
           })
         })
-    }, 5000)
+    }, 10000)
 
     this.setData({
       interval
@@ -276,9 +279,11 @@ Page({
   playerJoinGame: async function () {
     try {
       const { docid, playerid, roomid, lines } = this.data
-      await db.collection('rooms')
-        .doc(docid)
-        .update({
+      await wx.cloud.callFunction({
+        name: 'update_doc',
+        data: {
+          collection: 'rooms',
+          docid,
           data: {
             player: {
               color: 'white',
@@ -286,7 +291,8 @@ Page({
             },
             people: 2
           }
-        })
+        }
+      })
       const { data } = await db.collection('rooms')
         .where({ roomid })
         .get()
@@ -330,7 +336,7 @@ Page({
         row = row < 0 ? 0 : row
 
         const { color, drawer, chessmen } = that.data
-        if (chessmen[row][col]) {
+        if (chessmen[row][col] !== 0) {
           wx.showToast({
             title: '请重新落子',
             icon: 'none',
@@ -358,14 +364,17 @@ Page({
   playerUpdateRemoteChessmen: async function (row, col) {
     const { chessmen, docid } = this.data
     try {
-      await db.collection('rooms')
-        .doc(docid)
-        .update({
+      await wx.cloud.callFunction({
+        name: 'update_doc',
+        data: {
+          collection: 'rooms',
+          docid,
           data: {
             chessmen: encodeArray(chessmen),
             nowcolor: 'black'
           }
-        })
+        }
+      })
       const win = this.judge(row, col)
       if (!win) {
         return
@@ -385,14 +394,17 @@ Page({
   ownerUpdateRemoteChessmen: async function (row, col) {
     const { chessmen, docid } = this.data
     try {
-      await db.collection('rooms')
-        .doc(docid)
-        .update({
+      await wx.cloud.callFunction({
+        name: 'update_doc',
+        data: {
+          collection: 'rooms',
+          docid,
           data: {
             chessmen: encodeArray(chessmen),
             nowcolor: 'white'
           }
-        })
+        }
+      })
       const win = this.judge(row, col)
       if (!win) {
         return
@@ -415,6 +427,11 @@ Page({
     }
     const { lines } = this.data
     let num = 0, target = chessmen[x][y]
+    if (!target) {
+      return false
+    }
+
+    console.log('target is', target, '; chessmen', chessmen)
     
     // 垂直方向
     num = 0
