@@ -1,11 +1,11 @@
 const querystring = require('querystring')
 const request = require('request')
 
-function getOpenID(code) {
+function getOpenID(code, secret) {
   const url = 'https://api.weixin.qq.com/sns/jscode2session?' +
     querystring.encode({
       appid: 'wxe23cbe40231fcfe5',
-      secret: '8b8269317bc3d1182f64148ead4419cc',
+      secret,
       js_code: code,
       grant_type: 'authorization_code'
     })
@@ -44,7 +44,7 @@ exports.main = async (event, context) => {
   }
 
   try {
-    const res = await getOpenID(code)
+    const res = await getOpenID(code, secret)
     if (res.openid) {
       return {
         code: 0,
