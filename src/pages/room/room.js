@@ -59,6 +59,7 @@ Page({
     // 初始化画布
     const ctx = wx.createCanvasContext('checkerboard')
     const drawer = new Drawer(ctx)
+    drawer.background()
     drawer.lines(lines)
     // 更新数据
     const that = this

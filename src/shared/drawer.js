@@ -3,6 +3,12 @@ class Drawer {
     this.ctx = ctx
   }
 
+  background () {
+    this.ctx.setFillStyle('#ffd666')
+    this.ctx.fillRect(0, 0, 300, 300)
+    this.ctx.draw(true)
+  }
+
   lines(num) {
     this.ctx.setStrokeStyle('#595959')
     for (let i = 0; i < num; ++i) {
@@ -45,7 +51,6 @@ class Drawer {
     this.ctx.fill()
     this.ctx.draw(true)
   }
-
 }
 
 module.exports = Drawer
