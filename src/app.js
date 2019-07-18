@@ -1,4 +1,5 @@
 const { subscriber } = require('./shared/util.js')
+const { appSecret } = require('./config.js')
 
 //app.js
 App({
@@ -28,7 +29,8 @@ App({
           .callFunction({
             name: 'openid',
             data: {
-              code: res.code
+              code: res.code,
+              secret: appSecret
             }
           })
           .then(res => {

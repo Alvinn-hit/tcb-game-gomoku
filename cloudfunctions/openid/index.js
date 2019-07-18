@@ -23,6 +23,10 @@ function getOpenID(code) {
   })
 }
 
+function isValidStr (str) {
+  return typeof str === 'string' || str.trim().length
+}
+
 /**
  * code码
  * -1 未知错误
@@ -31,11 +35,11 @@ function getOpenID(code) {
  * 2 传入参数错误
  */
 exports.main = async (event, context) => {
-  let { code } = event
-  if (typeof code !== 'string' || !code.trim().length) {
+  let { code, secret } = event
+  if (!isValidStr(code) || !isValidStr(secret)) {
     return {
       code: 2,
-      msg: '客户端传入的code有误'
+      msg: '传入的 code / secret参数不合法'
     }
   }
 
