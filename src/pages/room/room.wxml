@@ -4,6 +4,10 @@
     <view class="page-rank-header_btn">房间号 {{roomid}}</view>
   </view>
   <view class="page-rank-main">
+    <view>
+      <view>{{ canRun ? '⏰ 轮到你了' : '⌛️ 等待对手' }}</view>
+      <view>您是 {{ color === 'white' ? '白棋' : '黑棋' }}</view>
+    </view>
     <canvas 
       id="checkerboard"
       canvas-id="checkerboard" 
@@ -12,5 +16,4 @@
     >
     </canvas>
   </view>
-  <!-- <component-toolbar></component-toolbar> -->
 </view>

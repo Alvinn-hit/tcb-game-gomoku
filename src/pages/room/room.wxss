@@ -26,12 +26,23 @@
   background: white;
   box-shadow: 0 8px 20px rgba(143,168,191,0.35);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   font-weight: bolder;
 }
 
-/* canvas {
-  position: relative;
-  left: -37.5px;
-} */
+.page-rank-main>view {
+  text-align: center;
+  padding-bottom: 30px;
+}
+
+.page-rank-main view view:first-child {
+  font-size: 1.2em;
+  color: #262626;
+}
+
+.page-rank-main view view:last-child {
+  font-size: 0.9em;
+  color: #595959;
+}
