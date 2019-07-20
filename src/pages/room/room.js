@@ -5,9 +5,7 @@ const {
   diffArray,
 } = require('./../../shared/util.js')
 
-const db = wx.cloud.database({
-  env: 'firsttest-qee47'
-})
+const { db } = require('./../../shared/database.js')
 
 Page({
 

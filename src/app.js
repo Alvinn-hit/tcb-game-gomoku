@@ -54,9 +54,7 @@ App({
 
   async getHistoryUserInfo () {
     const that = this
-    const db = wx.cloud.database({
-      env: 'firsttest-qee47'
-    })
+    const { db } = require('./shared/database.js')
 
     try {
       const res = await db.collection('users')

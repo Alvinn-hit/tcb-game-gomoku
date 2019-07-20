@@ -3,11 +3,10 @@ const {
   genRandomNumber,
   querystring,
 } = require('./../../shared/util.js')
-
-const db = wx.cloud.database({
-  env: 'firsttest-qee47'
-})
-const $ = db.command.aggregate
+const { 
+  db,
+  $,
+} = require('./../../shared/database.js')
 
 Page({
   data: {

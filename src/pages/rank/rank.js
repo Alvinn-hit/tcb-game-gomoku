@@ -1,9 +1,9 @@
 const app = getApp()
 
-const db = wx.cloud.database({
-  env: 'firsttest-qee47'
-})
-const $ = db.command.aggregate
+const { 
+  db,
+  $,
+} = require('./../../shared/database.js')
 
 Page({
 
