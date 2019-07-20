@@ -15,6 +15,27 @@
 
 ⚠️：由于「实时数据库」内测中，所以对外放出的版本是以「轮询」代替。
 
+## 快速开始
+
+下载项目：
+
+```bash
+git clone git@github.com:TencentCloudBase/tcb-game-gomoku.git tcb-game-gomoku
+```
+
+打开「微信开发者工具」，导入此项目。进入后，在上方工具栏开通「云开发」。
+
+进入「云数据库」，创建 `rooms` / `scores` / `users` 这三个集合。
+
+创建配置文件，并将其中信息替换为自己的信息：
+
+```bash
+cd tcb-game-gomoku
+cp src/config.example.js src/config.js
+```
+
+开发者工具中，上传 `cloudfunctions/` 下的「云函数」。
+
 ## UI 设计
 
 **游戏大厅**：
