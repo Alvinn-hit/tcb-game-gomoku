@@ -75,7 +75,10 @@ Page({
 
   onUnload: function () {
     const { interval, finished, roomid } = this.data
-    interval && clearInterval(interval)
+    // 不加分号，这里会有编译bug
+    // 会被编译成 interval && clearInterval(interval)(!finished) && this.forceExit(false)
+    // BUG单地址：https://developers.weixin.qq.com/community/develop/doc/000082047e81e03815e8c500551c00?fromCreate=1
+    interval && clearInterval(interval);
     (!finished) && this.forceExit(false)
     wx.cloud.callFunction({
       name: 'clear_room',
