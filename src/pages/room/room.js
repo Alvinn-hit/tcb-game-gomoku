@@ -2,7 +2,7 @@ const Drawer = require('./../../shared/drawer.js')
 const {
   encodeArray,
   decodeArray,
-  diffArray 
+  diffArray,
 } = require('./../../shared/util.js')
 
 const db = wx.cloud.database({
@@ -29,7 +29,9 @@ Page({
     // room记录的id
     docid: '',
     // 能不能走棋子
-    canRun: false
+    canRun: false,
+    // 判定输赢后，finished为true
+    finished: false
   },
 
   onLoad: function (option) {
@@ -72,8 +74,18 @@ Page({
   },
 
   onUnload: function () {
-    const { interval } = this.data
-    interval && clearInterval(interval)
+    const { interval, finished, roomid } = this.data
+    // 不加分号，这里会有编译bug
+    // 会被编译成 interval && clearInterval(interval)(!finished) && this.forceExit(false)
+    // BUG单地址：https://developers.weixin.qq.com/community/develop/doc/000082047e81e03815e8c500551c00?fromCreate=1
+    interval && clearInterval(interval);
+    (!finished) && this.forceExit(false)
+    wx.cloud.callFunction({
+      name: 'clear_room',
+      data: {
+        roomid
+      }
+    })
   },
 
   /**
@@ -86,6 +98,16 @@ Page({
       const { data } = await db.collection('rooms')
         .where({ roomid })
         .get()
+      if (!data.length) {
+        wx.showToast({
+          title: '房间已失效',
+          icon: 'none'
+        })
+        wx.navigateBack({
+          delta: 100
+        })
+        return ''
+      }
       this.setData({docid: data[0]._id})
       if (data[0].owner.id === playerid) {
         return 'owner'
@@ -154,7 +176,7 @@ Page({
   },
 
   /**
-   * 房间主人监听远程棋盘刷新
+   * 用户监听远程棋盘刷新
    */
   listenRemoteRefresh: function () {
     const that = this
@@ -166,6 +188,12 @@ Page({
         .get()
         .then(res => {
           const { data } = res
+          // 没有数据，说明对方退出了
+          if (!data.length) {
+            clearInterval(interval)
+            that.forceExit(true)
+            return
+          }
           // 和本机的棋盘状态进行比较
           if (encodeArray(chessmen) === data[0].chessmen) {
             return 
@@ -181,6 +209,9 @@ Page({
             console.log('胜利的棋子是：', decoded[x][y])
             wx.showToast({
               title: decoded[x][y] === 1 ? '黑子胜利' : '白子胜利',
+            })
+            that.setData({
+              finished: true
             })
             that.logScore(x, y, decoded)
           }
@@ -274,20 +305,16 @@ Page({
 
         drawer.circle(row, col, color)
         that.setData({ canRun: false })
-        if (color === 'black') {
-          that.ownerUpdateRemoteChessmen(row, col)
-        } else {
-          that.playerUpdateRemoteChessmen(row, col)
-        }
+        that.updateRemoteChessmen(row, col)
       })
       .exec()
   },
 
   /**
-   * 落子后，玩家更新远程棋盘
+   * 更新远程棋盘
    */
-  playerUpdateRemoteChessmen: async function (row, col) {
-    const { chessmen, docid } = this.data
+  updateRemoteChessmen: async function (row, col) {
+    const { chessmen, docid, color } = this.data
     try {
       await wx.cloud.callFunction({
         name: 'update_doc',
@@ -296,7 +323,7 @@ Page({
           docid,
           data: {
             chessmen: encodeArray(chessmen),
-            nowcolor: 'black'
+            nowcolor: color === 'white' ? 'black' : 'white'
           }
         }
       })
@@ -308,36 +335,9 @@ Page({
         title: chessmen[row][col] === 1 ? '黑子胜利' : '白子胜利',
       })
       this.logScore(row, col)
-    } catch (error) {
-      console.error(error)
-    }
-  },
-
-  /**
-   * 落子后，房间主人更新远程棋盘
-   */
-  ownerUpdateRemoteChessmen: async function (row, col) {
-    const { chessmen, docid } = this.data
-    try {
-      await wx.cloud.callFunction({
-        name: 'update_doc',
-        data: {
-          collection: 'rooms',
-          docid,
-          data: {
-            chessmen: encodeArray(chessmen),
-            nowcolor: 'white'
-          }
-        }
+      this.setData({
+        finished: true
       })
-      const win = this.judge(row, col)
-      if (!win) {
-        return
-      }
-      wx.showToast({
-        title: chessmen[row][col] === 1 ? '黑子胜利' : '白子胜利',
-      })
-      this.logScore(row, col)
     } catch (error) {
       console.error(error)
     }
@@ -477,5 +477,30 @@ Page({
     wx.navigateBack({
       delta: 100
     })
+  },
+
+  /**
+   * 强制退出
+   * 用途：更新成绩
+   */
+  forceExit: async function (win) {
+    const { playerid } = this.data
+    win = !!win
+
+    const { data } = await db.collection('scores')
+      .where({
+        openid: playerid
+      })
+      .get()
+    if (!data.length) {
+      return
+    }
+
+    const target = data[0]
+    await db.collection('scores')
+      .doc(target._id)
+      .update({
+        data: win ? { win: target.win + 1} : { fail: target.fail + 1 }
+      })
   }
 })
