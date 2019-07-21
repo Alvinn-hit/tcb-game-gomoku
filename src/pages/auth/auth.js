@@ -1,13 +1,21 @@
 const app = getApp()
+const { db } = require('./../../shared/database.js')
 
 Page({
 
   /**
    * 页面的初始数据
    */
-  data: {},
+  data: {
+    clicked: false
+  },
 
   getUserInfo: async function (res) {
+    if (this.data.clicked) {
+      return
+    }
+    this.setData({ clicked: true})
+
     const { detail } = res
     const {
       nickName,
@@ -17,9 +25,6 @@ Page({
     app.globalData.user.nickName = nickName
     app.globalData.user.avatarUrl = avatarUrl
 
-    const db = wx.cloud.database({
-      env: 'firsttest-qee47'
-    })
     wx.showLoading({
       title: '用户信息创建中',
     })
@@ -50,6 +55,7 @@ Page({
       wx.showLoading({
         title: '用户信息创建失败',
       })
+      this.setData({ clicked: false })
       console.error(error)
     }
   }
