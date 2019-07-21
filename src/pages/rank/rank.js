@@ -101,11 +101,11 @@ Page({
       })
       .limit(50)
       .end()
-    
+
     this.setData({
       scores: scores.map(item => ({
         ...item,
-        rate: Number.parseFloat(item.rate).toFixed(4) * 100
+        rate: (Number.parseFloat(item.rate) * 100).toFixed(2)
       }))
     })
   }
