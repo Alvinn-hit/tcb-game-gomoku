@@ -10,7 +10,12 @@
       <view>失败: {{fail}}</view>
     </view>
     <view class="page-rank-main_list">
-      <view class="page-rank-main_list-item" wx:for="{{scores}}" wx:key="{{index}}">
+      <view 
+        class="page-rank-main_list-item"
+        style="{{index % 2 ? '' : 'background: #fafafa;'}}"
+        wx:for="{{scores}}" 
+        wx:key="{{index}}"
+      >
         <text>{{index + 1}}th</text>
         <text>胜率: {{item.rate}}%</text>
         <text>胜 {{item.win}} / 负 {{item.fail}}</text>

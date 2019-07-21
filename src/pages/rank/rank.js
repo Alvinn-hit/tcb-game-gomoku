@@ -84,17 +84,13 @@ Page({
     const { list: scores } = await db.collection('scores')
       .aggregate()
       .addFields({
-        realFail: $.multiply(['$fail', -1]),
         total: $.add(['$fail', '$win'])
       })
       .match({
         total: $.gt(0)
       })
       .addFields({
-        realTotal: $.add(['$realFail', '$win'])
-      })
-      .addFields({
-        rate: $.divide(['$realTotal', '$total'])
+        rate: $.divide(['$win', '$total'])
       })
       .sort({
         rate: -1
