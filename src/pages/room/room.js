@@ -74,10 +74,10 @@ Page({
   onUnload: function () {
     const { interval, finished, roomid } = this.data
     // 不加分号，这里会有编译bug
-    // 会被编译成 interval && clearInterval(interval)(!finished) && this.forceExit(false)
+    // 会被编译成 interval && clearInterval(interval)(!finished) && this.forceLogScore(false)
     // BUG单地址：https://developers.weixin.qq.com/community/develop/doc/000082047e81e03815e8c500551c00?fromCreate=1
     interval && clearInterval(interval);
-    (!finished) && this.forceExit(false)
+    (!finished) && this.forceLogScore(false)
     wx.cloud.callFunction({
       name: 'clear_room',
       data: {
@@ -189,7 +189,10 @@ Page({
           // 没有数据，说明对方退出了
           if (!data.length) {
             clearInterval(interval)
-            that.forceExit(true)
+            that.forceLogScore(true)
+            wx.navigateBack({
+              delta: 100
+            })
             return
           }
           // 和本机的棋盘状态进行比较
@@ -481,7 +484,7 @@ Page({
    * 强制退出
    * 用途：更新成绩
    */
-  forceExit: async function (win) {
+  forceLogScore: async function (win) {
     const { playerid } = this.data
     win = !!win
 
