@@ -66,8 +66,12 @@ function querystring (params) {
   return result.slice(0, result.length - 1)
 }
 
+function localFlat (arr) {
+  return arr.reduce((arr, val) => arr.concat(val), [])
+}
+
 function encodeArray (arr) {
-  return arr.flat().join(',')
+  return localFlat(arr).join(',')
 }
 
 function decodeArray (str, shape) {
